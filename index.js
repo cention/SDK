@@ -1,9 +1,2 @@
-/**
- * @format
- */
-
-import {AppRegistry} from 'react-native';
-import App from './App';
-import {name as appName} from './app.json';
-
-AppRegistry.registerComponent(appName, () => App);
+// Assuming ChatModal, and possibly other components, are located in the src directory
+export { default as ChatModal } from './src/ChatModal';
