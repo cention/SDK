@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, TouchableWi
 import Svg, { Path, G, Defs, Rect, LinearGradient, Stop } from 'react-native-svg';
 import NextModal from './NextModal';
 import CentionIcons from './cention-icons';
-import { env, getCustomSdk } from './api_env';
+import { env, getCustomSdk, getActiveAgents } from './api_env';
 import { useWebSocket } from './WebSocketService';
 
 const ChatModal = ({ workSpace, widgetId }) => {
@@ -35,17 +35,29 @@ const ChatModal = ({ workSpace, widgetId }) => {
     const [eulaColor, setEULAColor] = useState(false);
     const [headerText, setHeaderText] = useState(null);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const [availableAgents, setAvailableAgents] = useState(false);
+
     const {
-        connected
+        agentAvailable
       } = useWebSocket(workSpace, widgetId);
       useEffect(()=>{
-        console.log({connected})
+        console.log('  __________  :',{agentAvailable})
 
-        if(connected){
+        if(agentAvailable){
             setShowChatPage(true)
         }
       },[])
     const fetchChatSdk = async () => {
+        const fetchAgents = await getActiveAgents(workSpace, widgetId);
+        const agents = fetchAgents.agents;
+        if (agents.length === 0) {
+            setAvailableAgents(false);
+        } else {
+            setAvailableAgents(true);
+        }
+        
+        console.log('Available agents        :', agents)
+
         const fetchData = await getCustomSdk(workSpace, widgetId);
         const data = fetchData.chatWidgetCfg;
         // const customize = data.customize;
@@ -255,7 +267,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
                     <View style={styles.modalContainer}>
 
                         <TouchableWithoutFeedback>
-                            <View style={[styles.modalContent, { backgroundColor: secondaryColor }]}>
+                            <View style={[styles.modalContent, { backgroundColor: secondaryColor, }]}>
                                 {showChatPage ? (
                                     <NextModal
                                        email={email}
@@ -272,6 +284,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
                                         inputBgColor = {inputBgColor}
                                         inputTextColor = {inputTextColor}
                                         titleText = {titleText}
+                                        availableAgents = {availableAgents}
                                     />
                                 ) : (
                                     <>

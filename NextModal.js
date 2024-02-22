@@ -14,12 +14,12 @@ import {
   useWindowDimensions,
   KeyboardAvoidingView,
 } from 'react-native';
-import Svg, {Circle, G, Path, Defs, ClipPath, Rect} from 'react-native-svg';
+import Svg, { Circle, G, Path, Defs, ClipPath, Rect } from 'react-native-svg';
 import FileUploader from './fileUploader/FileUploader';
 import CentionIcons from './cention-icons';
-import {useWebSocket} from './WebSocketService';
+import { useWebSocket } from './WebSocketService';
 import HTML from 'react-native-render-html';
-import { env } from './api_env';
+import { env, postUploadAnswerAttachment } from './api_env';
 
 const NextModal = React.memo(({
   question,
@@ -36,11 +36,12 @@ const NextModal = React.memo(({
   inputBgColor,
   inputTextColor,
   titleText,
+  availableAgents,
 }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const scrollViewRef = useRef();
   const [messages2, setMessage2] = useState('');
-  const hitSlop = {top: 10, bottom: 10, left: 20, right: 20};
+  const hitSlop = { top: 10, bottom: 10, left: 20, right: 20 };
   const [isAttachAvailable, setIsAttachAvailable] = useState(false);
   const [isDropdownOpen1, setIsDropdownOpen1] = useState(false);
   const [isChat, setIsChat] = useState(false);
@@ -52,6 +53,12 @@ const NextModal = React.memo(({
   const [fId, setFId] = useState(null);
   const [attachmentURL, setAttouchmentURL] = useState([]);
   const [isPreviewModalVisible, setPreviewModalVisible] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [animationProgress, setAnimationProgress] = useState(1);
+  const [animationCompleted, setAnimationCompleted] = useState(false);
+  const opacity = animationCompleted ? 1 : animationProgress / 70;
+  const fillColor = `rgba(${parseInt(primaryColor.substring(1, 3), 16)}, ${parseInt(primaryColor.substring(3, 5), 16)}, ${parseInt(primaryColor.substring(5, 7), 16)}, ${opacity})`;
   const tagStyles = useMemo(() => ({
     body: {
       color: 'grey',
@@ -59,33 +66,33 @@ const NextModal = React.memo(({
     },
   }), []);
 
-  const postUploadAnswerAttachment = async body => {
-    console.log(`${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`)
-    const response = await fetch(
-      `${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`,
-      {
-        method: 'POST',
-        headers: {
-          Accept: '*/*',
-          'Content-Type': 'multipart/form-data',
-        },
-        credentials: 'same-origin',
-        body: body,
-      },
-    );
-    return handleResponse(response);
-  };
+  // const postUploadAnswerAttachment = async body => {
+  //   console.log(`${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`)
+  //   const response = await fetch(
+  //     `${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`,
+  //     {
+  //       method: 'POST',
+  //       headers: {
+  //         Accept: '*/*',
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //       credentials: 'same-origin',
+  //       body: body,
+  //     },
+  //   );
+  //   return handleResponse(response);
+  // };
 
-  const handleResponse = async response => {
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    } else {
-      throw new Error(
-        'Error: ' + response.status + ' - ' + response.statusText,
-      );
-    }
-  };
+  // const handleResponse = async response => {
+  //   if (response.ok) {
+  //     const data = await response.json();
+  //     return data;
+  //   } else {
+  //     throw new Error(
+  //       'Error: ' + response.status + ' - ' + response.statusText,
+  //     );
+  //   }
+  // };
 
   const {
     sendMessageToWebSocket,
@@ -94,10 +101,14 @@ const NextModal = React.memo(({
     newMessage,
     sendAttachmentToWebSocket,
     sessionId,
+    agentAvailable,
     sessionSecret,
   } = useWebSocket(workSpace, widgetId);
   useEffect(() => {
-    sendRegistrationData({name, email, question});
+    console.log('  __________  :', { agentAvailable })
+  }, [agentAvailable])
+  useEffect(() => {
+    sendRegistrationData({ name, email, question });
   }, []);
   const handleDropdownToggle1 = () => {
     setIsDropdownOpen1(!isDropdownOpen1);
@@ -111,7 +122,7 @@ const NextModal = React.memo(({
   };
   const handleUploadAttachment = async dataFiles => {
     if (dataFiles) {
-      const result = await postUploadAnswerAttachment(dataFiles);
+      const result = await postUploadAnswerAttachment(dataFiles, workSpace);
       console.log(result);
       // const PROD_URL = 'https://cloud-qa.cention.com/s/tobias';
       setFId(result.id);
@@ -132,6 +143,7 @@ const NextModal = React.memo(({
     }
     setIsDropdownOpen1(false);
   };
+
   useEffect(() => {
     console.log('ollllllll', newMessage);
     if (newMessage && newMessage.length > 0) {
@@ -164,28 +176,54 @@ const NextModal = React.memo(({
         // const url = ` <a href=${fileURL}></a>`
 
         const url = `<a title="${fileName}" href="${fileURL}"><img src="${fileURL}" alt="${fileName}" style="max-width:200px;max-height:200px"/></a>`;
-        console.log({url});
+        console.log({ url });
         return url;
       }
       const regex = /<img src="([^"]+)"[^>]*>/g;
       const updatedMessage = message.replace(regex, (match, src) => {
-        console.log({src});
+        console.log({ src });
         if (!src.startsWith(baseUrl)) {
           return match.replace(src, baseUrl + src);
         }
         return match;
       });
-      console.log({updatedMessage});
+      console.log({ updatedMessage });
       return updatedMessage;
     }
   }
-  const {width} = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const handleRemoveAttachment = async () => {
     if (fId) {
       const result = await postRemoveTempAttachment(fId);
       // console.log('=====================>', result);
     }
   };
+  useEffect(() => {
+    let interval;
+
+    if (loading && !animationCompleted) {
+      interval = setInterval(() => {
+        setAnimationProgress((prev) => {
+          const nextProgress = (prev + 0.5) % 101;
+
+          if (nextProgress === 1) {
+
+            clearInterval(interval);
+            setLoading(false);
+            setAnimationCompleted(true);
+          }
+
+          return nextProgress;
+        });
+      }, 16);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [loading, animationCompleted]);
 
   const handleSendMessage = async () => {
     try {
@@ -195,24 +233,30 @@ const NextModal = React.memo(({
       sendMessageToWebSocket(messages2);
       setMessage2('');
 
-      scrollViewRef.current.scrollToEnd({animated: true});
+      scrollViewRef.current.scrollToEnd({ animated: true });
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
 
+    return () => clearTimeout(timer);
+  }, []);
   const renderFooter = () => {
     const renderMessage = (message, index) => {
       if (message.sender === 'agent') {
         return (
           <View key={index} style={chatStyles.messageContainerLeft}>
             {/* Agent Message */}
-            <View style={[chatStyles.message, {backgroundColor: agentBgColor}]}>
+            <View style={[chatStyles.message, { backgroundColor: agentBgColor }]}>
               <View style={chatStyles.messageContent}>
                 <Text style={chatStyles.senderName}>{message.agent}</Text>
                 <ScrollView horizontal={false}>
                   <Text
-                    style={[chatStyles.messageText, {color: chatTextColor}]}>
+                    style={[chatStyles.messageText, { color: chatTextColor }]}>
                     {message.message}
                   </Text>
                 </ScrollView>
@@ -227,13 +271,13 @@ const NextModal = React.memo(({
             <View
               style={[
                 chatStyles.rightMessage,
-                {backgroundColor: clientBgColor},
+                { backgroundColor: clientBgColor },
               ]}>
               <View style={chatStyles.messageContent}>
                 <Text style={chatStyles.senderName}>{name}</Text>
                 <ScrollView horizontal={true}>
                   <Text
-                    style={[chatStyles.messageText, {color: chatTextColor}]}>
+                    style={[chatStyles.messageText, { color: chatTextColor }]}>
                     {message.message}
                   </Text>
                 </ScrollView>
@@ -353,7 +397,7 @@ const NextModal = React.memo(({
               </Defs>
             </Svg>
             {/* Agent Message */}
-            <View style={[chatStyles.message, {backgroundColor: agentBgColor}]}>
+            <View style={[chatStyles.message, { backgroundColor: agentBgColor }]}>
               <View style={chatStyles.messageContent}>
                 <Text style={chatStyles.senderName}>{message.agent}</Text>
                 {/* <ScrollView horizontal={false}>
@@ -362,7 +406,7 @@ const NextModal = React.memo(({
                 <ScrollView horizontal={false}>
                   <HTML
                     tagsStyles={tagStyles}
-                    source={{html: message.message}}
+                    source={{ html: message.message }}
                     contentWidth={width}
                   />
                 </ScrollView>
@@ -380,7 +424,7 @@ const NextModal = React.memo(({
             <View
               style={[
                 chatStyles.rightMessage,
-                {backgroundColor: clientBgColor},
+                { backgroundColor: clientBgColor },
               ]}>
               <View style={chatStyles.messageContent}>
                 <Text style={chatStyles.senderName}>{name}</Text>
@@ -390,7 +434,7 @@ const NextModal = React.memo(({
                 <ScrollView horizontal={false}>
                   <HTML
                     tagsStyles={tagStyles}
-                    source={{html: message.message}}
+                    source={{ html: message.message }}
                     contentWidth={width}
                   />
                 </ScrollView>
@@ -402,23 +446,60 @@ const NextModal = React.memo(({
     }
   };
   return (
-    <View style={[chatStyles.container, {backgroundColor: chatBgColor}]}>
-           <View style={[chatStyles.actionBar, { backgroundColor: primaryColor }]}>
-        <TouchableOpacity style={chatStyles.actionIcon} hitSlop={hitSlop}>
-          <CentionIcons name="chevron-mini-down" size={22} fontWeight="800" color={headerColor} />
-        </TouchableOpacity>
-        <Text style={[chatStyles.title, { color: headerColor }]}>{titleText}</Text>
-      </View>
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={[
-          chatStyles.messageContainer,
-          {backgroundColor: chatBgColor},
-        ]}>
-        {chatMessages.map(renderMessage)}
-      </ScrollView>
-      {renderFooter()}
-    </View>
+    <>
+      {loading && (
+        <View style={chatStyles.container}>
+          <View style={chatStyles.svgContainer}>
+          <CentionIcons name="chats" size={70} fontWeight="400" color={fillColor}/>
+          </View>
+
+
+        </View>
+      )}
+
+      {!loading && availableAgents && (
+        <View style={[chatStyles.container, { backgroundColor: chatBgColor }]}>
+          <View style={[chatStyles.actionBar, { backgroundColor: primaryColor }]}>
+            <TouchableOpacity style={chatStyles.actionIcon} hitSlop={hitSlop}>
+              <CentionIcons name="chevron-mini-down" size={22} fontWeight="800" color={headerColor} />
+            </TouchableOpacity>
+            <Text style={[chatStyles.title, { color: headerColor }]}>{titleText}</Text>
+          </View>
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={[
+              chatStyles.messageContainer,
+              { backgroundColor: chatBgColor },
+            ]}>
+            {chatMessages.map(renderMessage)}
+          </ScrollView>
+          {renderFooter()}
+        </View>
+      )}
+      {!loading && !availableAgents && (
+        <View style={chatStyles.container}>
+          <View style={{
+            width: '50%',
+            alignSelf: 'center',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <CentionIcons name="chat-close" size={70} fontWeight="400" color={fillColor}/>
+            <Text style={{
+              textAlign: 'center',
+              paddingTop: 8,
+              color: primaryColor,
+              fontSize: 12,
+              fontFamily: 'Roboto',
+              fontWeight: '800',
+            }}>
+              Ops,There are no available agents now.
+            </Text>
+          </View>
+        </View>
+      )}
+    </>
   );
 });
 const chatStyles = StyleSheet.create({
@@ -452,7 +533,12 @@ const chatStyles = StyleSheet.create({
     paddingTop: 16,
     zIndex: 2,
   },
+  svgContainer: {
+    flex: 1,
 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   actionIcon: {
     marginLeft: -5,
     marginRight: -18,
