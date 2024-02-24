@@ -188,14 +188,14 @@ export const useWebSocket = () => {
     // }
     return new Promise((resolve, reject) => {
       
-    console.log(name, email, question)
+    // console.log(name, email, question)
        const webSocket = new WebSocket('wss://cloud-qa.cention.com/s/tobias/external.ws');
 
        webSocketInstance = webSocket;
-    console.log("WebSocketteedt");
+    // console.log("WebSocketteedt");
 
     webSocket.onopen = () => {
-      console.log("WebSocket connection opened.");
+      // console.log("WebSocket connection opened.");
 
       const registrationRequest = {
         "type":"register",
@@ -232,13 +232,13 @@ export const useWebSocket = () => {
   webSocket.onclose = () => {
     removeWebsocket()
 
-     AsyncStorage.removeItem('sessionId');
-     AsyncStorage.removeItem('sessionSecret');
+    //  AsyncStorage.removeItem('sessionId');
+    //  AsyncStorage.removeItem('sessionSecret');
     // console.log('WebSocket connection closed');
     // reconnect();
   };
   webSocket.onmessage = async (event) => {
-    console.log("Received:", event);
+    // console.log("Received:", event);
     const messageData = JSON.parse(event.data);
     if (messageData.event === 'register') {
         // Assuming messageData.args is an array and we're interested in the first element
@@ -247,11 +247,11 @@ export const useWebSocket = () => {
           const { sessionId, sessionSecret } = registrationInfo;
           setSessionId(sessionId)
           setSessionSecret(sessionSecret)
-          console.log('================================v',sessionId,sessionSecret)
+          // console.log('================================v',sessionId,sessionSecret)
           await AsyncStorage.setItem('sessionId', sessionId);
           await AsyncStorage.setItem('sessionSecret', sessionSecret);
-          console.log("Session ID:", sessionId);
-          console.log("Session Secret:", sessionSecret);
+          // console.log("Session ID:", sessionId);
+          // console.log("Session Secret:", sessionSecret);
           // webSocket.send('{"id":2,"payload":"agent registered"}');
         }
     }
@@ -261,10 +261,10 @@ export const useWebSocket = () => {
        const result = await parseMessagesInfo(messageData)
       
         setNewMessages(result)
-        console.log('=-=-=-=-=-=--==-=-=-=- ',result.message)
+        // console.log('=-=-=-=-=-=--==-=-=-=- ',result.message)
         if (result && result.length > 0) {
           const index = result[0]?.message?.length - 1;
-            console.log('================================',);
+            // console.log('================================',);
             const title = "New Message"; // Customize based on your data structure
             const message = messageData.message; // Customize this as well
             if(result[0].message[index].agent){
@@ -306,7 +306,7 @@ export const useWebSocket = () => {
   }
 
   const removeWebsocket = async()=> {
-    await AsyncStorage.setItem('isRegistered', 'false');
+    await AsyncStorage.removeItem('token');
   }
   const parseMessageArray = (messages) => {
     // // console.log('===========',messages?.messages )
@@ -452,7 +452,7 @@ export const useWebSocket = () => {
     //   id: 5,
     // };
     const messageString = JSON.stringify(chatMessage);
-    console.log('here',webSocket)
+    // console.log('here',webSocket)
 
     webSocket.send(messageString);
     // reconnect();
@@ -559,5 +559,5 @@ export const useWebSocket = () => {
   //   };
   // }, []);
 
-  return { chats, sessionId, sessionSecret,newChats,agentAvailable,newMessage,sendRegistrationData, setChats,sendMessageToWebSocket , sendDeleteErrand,sendAttachmentToWebSocket };
+  return { chats, sessionId, sessionSecret,newChats,agentAvailable,newMessage,removeWebsocket,sendRegistrationData, setChats,sendMessageToWebSocket , sendDeleteErrand,sendAttachmentToWebSocket };
 };

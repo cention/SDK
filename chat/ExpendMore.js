@@ -11,7 +11,7 @@ import {
 
 
 const ExpendMore = ({ data,areaId, id,cipherKey, isDarkMode}) => {
-  console.log('Expeeeend', isDarkMode)
+  // console.log('Expeeeend', isDarkMode)
   const expendStyle = isDarkMode ? expendStylesD : expendStyles;
     const [moreData, setMoreData] = useState(null);
     const [state , setState] = useState([])
@@ -33,7 +33,7 @@ const ExpendMore = ({ data,areaId, id,cipherKey, isDarkMode}) => {
       };
     const getConnectedAgentArea = async () => {
         const result = await getConnectedAgentAreas();
-        console.log('==================[[]]=============', result);
+        // console.log('==================[[]]=============', result);
         const area = result.areas.find(a => a.Name === areaId);
         const AreaInfo = area.Areas.map(area => ({Name: area.Name, Id: area.Id}));
         setConnectedArea(AreaInfo)    
@@ -47,13 +47,13 @@ const ExpendMore = ({ data,areaId, id,cipherKey, isDarkMode}) => {
       }
       const handlestateSelect= async (list)  =>{
         const result = await postChangeErrandInternalState(id , list.id,list.name)
-        console.log(']]]handlestateSelect=====',result)
+        // console.log(']]]handlestateSelect=====',result)
         setSelectedState(list.name)
         setIsStatePressed(false)
       }
       const handleConnectedAreaSelect = async (list) =>{
         const result = await postPassiveChangeErrandArea(list.Id,id,cipherKey)
-        console.log(']]]]]]]]]]]]]]=====>>>>>',{result})
+        // console.log(']]]]]]]]]]]]]]=====>>>>>',{result})
         
         setMoreData((prevData) => ({
           ...prevData,

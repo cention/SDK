@@ -79,7 +79,7 @@ function App() {
             ))} */}
           </View>
         </View>
-        <ChatModal workSpace= {'demo-eu'} widgetId = {1} />
+        <ChatModal workSpace= {'tobias'} widgetId = {133} />
       </ScrollView>
     </SafeAreaView>
   );

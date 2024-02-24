@@ -48,7 +48,7 @@ export const getActiveAgents = async (workSpace, widgetId) =>{
 
 }
 export const postUploadAnswerAttachment = async( body, workSpace) => {
-  console.log(`${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`)
+  // console.log(`${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`)
   const response = await fetch(
     `${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`,
     {

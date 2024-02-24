@@ -5,6 +5,7 @@ import NextModal from './NextModal';
 import CentionIcons from './cention-icons';
 import { env, getCustomSdk, getActiveAgents } from './api_env';
 import { useWebSocket } from './WebSocketService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatModal = ({ workSpace, widgetId }) => {
     const [name, setName] = useState('');
@@ -36,17 +37,38 @@ const ChatModal = ({ workSpace, widgetId }) => {
     const [headerText, setHeaderText] = useState(null);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [availableAgents, setAvailableAgents] = useState(false);
+    const [resumeChat, setResumeChat] = useState(false);
 
     const {
-        agentAvailable
+        createNewChat
       } = useWebSocket(workSpace, widgetId);
-      useEffect(()=>{
-        console.log('  __________  :',{agentAvailable})
+      const resume = async () =>{
+        let token = await AsyncStorage.getItem('token');
 
-        if(agentAvailable){
-            setShowChatPage(true)
+        if (token) {
+        setResumeChat(true)            
         }
-      },[])
+        else{
+            setResumeChat(false) 
+        }
+      }
+      const newChat = async () =>{
+        setShowChatPage(false);
+
+      }
+      useEffect(()=>{
+        if(createNewChat){
+            setShowChatPage(false);
+        }
+      },[createNewChat])
+      useEffect(()=>{
+        resume()
+        if (resumeChat){
+            setShowChatPage(true);
+        } else {
+            setShowChatPage(false);
+        }
+      },[resumeChat])
     const fetchChatSdk = async () => {
         const fetchAgents = await getActiveAgents(workSpace, widgetId);
         const agents = fetchAgents.agents;
@@ -55,13 +77,8 @@ const ChatModal = ({ workSpace, widgetId }) => {
         } else {
             setAvailableAgents(true);
         }
-        
-        console.log('Available agents        :', agents)
-
         const fetchData = await getCustomSdk(workSpace, widgetId);
-        const data = fetchData.chatWidgetCfg;
-        // const customize = data.customize;
-  
+        const data = fetchData.chatWidgetCfg;  
         //Get colors
         const css = data.css;
         const headerColor = css.headerColor;
@@ -149,7 +166,9 @@ const ChatModal = ({ workSpace, widgetId }) => {
         fetchChatSdk();
     }, [])
     useEffect(() => {
-
+        if (resumeChat){
+            setShowChatPage(true);
+        }
         const timeout = setTimeout(() => {
             setShowOtherContent(true);
         }, 3000);
@@ -232,9 +251,6 @@ const ChatModal = ({ workSpace, widgetId }) => {
         } else {
             try {
                 setEmailError("");
-                // await sendRegistrationData({ name, email, question });
-                // sendMessageToWebSocket here can be adjusted to pass necessary parameters or handled differently based on your logic
-                // sendMessageToWebSocket();
                 setShowChatPage(true);
               } catch (error) {
                 // Handle any errors that occurred during registration
@@ -285,6 +301,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
                                         inputTextColor = {inputTextColor}
                                         titleText = {titleText}
                                         availableAgents = {availableAgents}
+                                        newChat={newChat}
                                     />
                                 ) : (
                                     <>

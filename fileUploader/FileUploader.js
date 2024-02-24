@@ -27,7 +27,7 @@ const FileUploader = props => {
       setIsPreviewModalVisible(true);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
-        console.log('User canceled file selection.');
+        // console.log('User canceled file selection.');
       } else {
         console.error('Error picking a file:', err);
       }
