@@ -77,7 +77,7 @@ export const useWebSocket = (workSpace, widgetId) => {
         };
         webSocket.onmessage = async event => {
           const messageData = JSON.parse(event.data);
-          if (messageData.args[0].error === 'no session') {
+          if (messageData?.args[0]?.error === 'no session') {
             setNoSession(true);
             removeWebsocket();
           }
@@ -151,7 +151,7 @@ export const useWebSocket = (workSpace, widgetId) => {
          
         };
         webSocket.onmessage = async event => {
-          // console.log('Received:', event);
+          console.log('Received:', event);
           const messageData = JSON.parse(event.data);
           if (
             lastMessage &&

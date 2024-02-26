@@ -65,7 +65,7 @@ const NextModal = React.memo(({
   }), []);
 
   const handleCreateNewChat = async () => {
-    // newChat()
+    newChat()
   }
   
   const {
@@ -107,19 +107,22 @@ const NextModal = React.memo(({
   };
   useEffect(() => {
     if (newMessage && newMessage.length > 0 && initialLoad) {
+      console.log("first")
       const allMessages = newMessage[0].message;
+      setClientName(newMessage[0].clientName)
        allMessages.map(parseNewMessages);
       setInitialLoad(false); 
     }
   }, [newMessage]);
   useEffect(() => {
     if (newMessage && newMessage.length > 0 && !initialLoad) {
+      console.log("second")
     const latestMessage = newMessage[0].message[newMessage[0].message.length - 1];
     const parsedMessage = parseNewMessages(latestMessage);
     setClientName(newMessage[0].clientName)
     setChatMessages((prevMessages) => [...prevMessages, parsedMessage]);
     }
-  }, [newMessage, initialLoad]);
+  }, [newMessage]);
   const parseNewMessages = newMessage => {
     const result = {
       agent: newMessage.agent,
