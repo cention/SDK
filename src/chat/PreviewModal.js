@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import {previewStyles} from './chatS';
 import { View, Modal, Image, Text, Button, TouchableOpacity,Linking, StyleSheet } from 'react-native';
 import Swiper from 'react-native-swiper';
-
+import CentionIcons from '../cention-icons';
 const PreviewModal = ({
   visible,
-  isSent,
   imageUri,
   onClose,
   onSend,
@@ -14,9 +13,12 @@ const PreviewModal = ({
 }) => {
   const [galleryIndex, setGalleryIndex] = useState(0);
 
+    // Function to change the gallery index to a specific image
   const openGallery = (index) => {
     setGalleryIndex(index);
   };
+
+    // Function to open an image link in the browser
   const openImageLink = (url) => {
     Linking.openURL(url);
   };
@@ -43,18 +45,14 @@ const PreviewModal = ({
         </Swiper>
 
         <TouchableOpacity onPress={onClose} style={previewStyles.closeButton}>
-          <Text style={{ color: 'white', fontSize: 18 }}>Close</Text>
+        <CentionIcons name="times" size={21} fontWeight="800" color="white" />
         </TouchableOpacity>
 
-        {!isAttachmentPreviewModalVisible && (
-          <View style={previewStyles.buttonContainer}>
-            {!isSent && <Button title="Send" onPress={onSend} />}
-            {isSent && <Button title="Remove" onPress={onClose} />}
-          </View>
-        )}
+       
       </View>
-
-      {renderFooter()}
+      <View style={previewStyles.foot}>
+      {renderFooter(onSend)}
+      </View>
     </Modal>
   );
 };

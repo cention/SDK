@@ -7,7 +7,6 @@ import Svg, { Path } from 'react-native-svg';
 import selectionsData from './selection.json'
 const getPathsForIcon = (iconName) => {
     const icon = selectionsData.icons.find(item => item.properties.name === iconName);
-    // console.log("here", icon)
     return icon ? icon.icon.paths : [];
   };
 
