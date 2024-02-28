@@ -44,6 +44,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
       } = useWebSocket(workSpace, widgetId);
       const resume = async () =>{
         let token = await AsyncStorage.getItem('token');
+        console.log('================token', token)
 
         if (token) {
         setResumeChat(true)            
@@ -61,14 +62,18 @@ const ChatModal = ({ workSpace, widgetId }) => {
             setShowChatPage(false);
         }
       },[createNewChat])
+    //   useEffect(()=>{
+    //     resume()
+    //     if (resumeChat){
+    //         setShowChatPage(true);
+    //     } else {
+    //         setShowChatPage(false);
+    //     }
+    //   },[resumeChat])
       useEffect(()=>{
         resume()
-        if (resumeChat){
-            setShowChatPage(true);
-        } else {
-            setShowChatPage(false);
-        }
-      },[resumeChat])
+
+      },[showOtherContent])
     const fetchChatSdk = async () => {
         const fetchAgents = await getActiveAgents(workSpace, widgetId);
         const agents = fetchAgents.agents;
@@ -302,6 +307,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
                                         titleText = {titleText}
                                         availableAgents = {availableAgents}
                                         newChat={newChat}
+                                        toggleChatModal = {toggleChatModal}
                                     />
                                 ) : (
                                     <>

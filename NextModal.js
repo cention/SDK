@@ -17,6 +17,8 @@ import {
 import Svg, { Circle, G, Path, Defs, ClipPath, Rect } from 'react-native-svg';
 import FileUploader from './fileUploader/FileUploader';
 import CentionIcons from './cention-icons';
+import { attachStyles } from './chat/chatS';
+import { attachStylesD } from './chat/chatD';
 import { useWebSocket } from './WebSocketService';
 import HTML from 'react-native-render-html';
 import { env, postUploadAnswerAttachment } from './api_env';
@@ -37,25 +39,29 @@ const NextModal = React.memo(({
   inputTextColor,
   titleText,
   availableAgents,
-  newChat
+  newChat,
+  toggleChatModal,
 }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const scrollViewRef = useRef();
   const [messages2, setMessage2] = useState('');
+  const [messagesP, setMessageP] = useState('');
   const hitSlop = { top: 10, bottom: 10, left: 20, right: 20 };
   // const [isAttachAvailable, setIsAttachAvailable] = useState(false);
   const [isDropdownOpen1, setIsDropdownOpen1] = useState(false);
   // const [isChat, setIsChat] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  // const [fId, setFId] = useState(null);
   // const [attachmentURL, setAttouchmentURL] = useState([]);
   // const [isPreviewModalVisible, setPreviewModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [animationProgress, setAnimationProgress] = useState(1);
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [clientName,setClientName] = useState('')
+  const [clientName, setClientName] = useState('')
+  const [chatEnded, setChatEnded] = useState(false);
   const opacity = animationCompleted ? 1 : animationProgress / 70;
+  const isDarkMode = false;
+  const attachStyle = isDarkMode ? attachStylesD : attachStyles;
   const fillColor = `rgba(${parseInt(primaryColor.substring(1, 3), 16)}, ${parseInt(primaryColor.substring(3, 5), 16)}, ${parseInt(primaryColor.substring(5, 7), 16)}, ${opacity})`;
   const tagStyles = useMemo(() => ({
     body: {
@@ -67,7 +73,7 @@ const NextModal = React.memo(({
   const handleCreateNewChat = async () => {
     newChat()
   }
-  
+
   const {
     sendMessageToWebSocket,
     sendDeleteErrand,
@@ -96,11 +102,19 @@ const NextModal = React.memo(({
   const handleOverlayPress1 = () => {
     setIsDropdownOpen1(false);
   };
+
+
+
+
+
+
   const handleUploadAttachment = async dataFiles => {
     if (dataFiles) {
       const result = await postUploadAnswerAttachment(dataFiles, workSpace);
       // setFId(result.id);
       // let mcount = chatMessages.length;
+      console.log(';;;;;;;;;;;;', result)
+
       sendAttachmentToWebSocket(result);
     }
     setIsDropdownOpen1(false);
@@ -110,17 +124,17 @@ const NextModal = React.memo(({
       console.log("first")
       const allMessages = newMessage[0].message;
       setClientName(newMessage[0].clientName)
-       allMessages.map(parseNewMessages);
-      setInitialLoad(false); 
+      allMessages.map(parseNewMessages);
+      setInitialLoad(false);
     }
   }, [newMessage]);
   useEffect(() => {
     if (newMessage && newMessage.length > 0 && !initialLoad) {
       console.log("second")
-    const latestMessage = newMessage[0].message[newMessage[0].message.length - 1];
-    const parsedMessage = parseNewMessages(latestMessage);
-    setClientName(newMessage[0].clientName)
-    setChatMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      const latestMessage = newMessage[0].message[newMessage[0].message.length - 1];
+      const parsedMessage = parseNewMessages(latestMessage);
+      setClientName(newMessage[0].clientName)
+      setChatMessages((prevMessages) => [...prevMessages, parsedMessage]);
     }
   }, [newMessage]);
   const parseNewMessages = newMessage => {
@@ -133,7 +147,7 @@ const NextModal = React.memo(({
       // sender: 'newMessage.fromClient ? sender : newMessage.agent',
       timestamp: newMessage.sentHuman,
     };
-    console.log('Neeee',result)
+    console.log('Neeee', result)
 
     setChatMessages(prevMessages => [...prevMessages, result]);
   };
@@ -209,6 +223,28 @@ const NextModal = React.memo(({
 
     return () => clearTimeout(timer);
   }, []);
+  const handleSendMessagePreview = async () => {
+    try {
+      let mcount = chatMessages.length;
+
+      if (messagesP.trim() === '') return;
+      sendMessageToWebSocket(messagesP);
+      setMessageP('');
+
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+
   const renderFooter = () => {
     // const renderMessage = (message, index) => {
     //   if (message.sender === 'agent') {
@@ -287,6 +323,9 @@ const NextModal = React.memo(({
                     />
                   </Svg>
                 </TouchableOpacity>
+
+
+
                 <FileUploader
                   sessionId={sessionId}
                   sessionSecret={sessionSecret}
@@ -305,8 +344,11 @@ const NextModal = React.memo(({
                   selectedFile={selectedFile}
                   setSelectedFile={setSelectedFile}
                   // setPreviewModalVisible={setPreviewModalVisible}
-                  renderFooter={renderFooter}
+                  renderFooter={renderFooterPreview}
+                  chatEnded={chatEnded}
+                  handleSendMessage={handleSendMessagePreview}
                 />
+
               </View>
               <View style={chatStyles.menuBarRight}>
                 <TouchableOpacity onPress={handleSendMessage} hitSlop={hitSlop}>
@@ -330,25 +372,131 @@ const NextModal = React.memo(({
       </KeyboardAvoidingView>
     );
   };
+  const renderFooterPreview = (onSend) => {
+
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={chatStyles.inputContainer}>
+          <View style={chatStyles.inputWrapper}>
+            {/* <Text
+              style={[
+                chatStyles.input,
+                {
+                  color: inputTextColor,
+                  backgroundColor: inputBgColor,
+                  borderColor: primaryColor,
+                },
+              ]}
+              
+            > Attach your Image or document</Text> */}
+            <View style={chatStyles.menuBarContainer}>
+              <View style={chatStyles.menuBarLeft}>
+                <TouchableOpacity
+
+                  hitSlop={hitSlop}>
+                  {/* <Svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <Path
+                      id="Path 583"
+                      d="M18.75 9.5H10.5V1.25C10.5 1.05109 10.421 0.860322 10.2803 0.71967C10.1397 0.579018 9.94891 0.5 9.75 0.5C9.55109 0.5 9.36032 0.579018 9.21967 0.71967C9.07902 0.860322 9 1.05109 9 1.25V9.5H0.75C0.551088 9.5 0.360322 9.57902 0.21967 9.71967C0.0790176 9.86032 0 10.0511 0 10.25C0 10.4489 0.0790176 10.6397 0.21967 10.7803C0.360322 10.921 0.551088 11 0.75 11H9V19.25C9 19.4489 9.07902 19.6397 9.21967 19.7803C9.36032 19.921 9.55109 20 9.75 20C9.94891 20 10.1397 19.921 10.2803 19.7803C10.421 19.6397 10.5 19.4489 10.5 19.25V11H18.75C18.9489 11 19.1397 10.921 19.2803 10.7803C19.421 10.6397 19.5 10.4489 19.5 10.25C19.5 10.0511 19.421 9.86032 19.2803 9.71967C19.1397 9.57902 18.9489 9.5 18.75 9.5Z"
+                      fill={primaryColor}
+                    />
+                  </Svg> */}
+                  <Svg
+                   
+                    width="25"
+                    height="25"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <Path
+                      d="M6 5.5V11.4675C5.99575 11.6215 5.8905 12.974 3.5 12.974C1.1095 12.974 1.00425 11.6215 1 11.474V2.50275C1.003 2.25175 1.08875 1 2.5 1C3.91125 1 3.997 2.25175 4 2.5V9.49425C4.00719 9.56193 3.99926 9.63037 3.97676 9.6946C3.95426 9.75884 3.91777 9.81727 3.86991 9.86567C3.82206 9.91408 3.76405 9.95124 3.70007 9.97447C3.6361 9.9977 3.56776 10.0064 3.5 10C3.4327 10.0066 3.36478 9.99821 3.30111 9.97542C3.23745 9.95263 3.17963 9.916 3.13181 9.86819C3.084 9.82037 3.04737 9.76255 3.02458 9.69889C3.00179 9.63522 2.99339 9.5673 3 9.5V5.5C3 5.36739 2.94732 5.24021 2.85355 5.14645C2.75979 5.05268 2.63261 5 2.5 5C2.36739 5 2.24021 5.05268 2.14645 5.14645C2.05268 5.24021 2 5.36739 2 5.5V9.5C1.99416 9.69857 2.02896 9.89624 2.10227 10.0809C2.17559 10.2655 2.28586 10.4332 2.42633 10.5737C2.5668 10.7141 2.7345 10.8244 2.91913 10.8977C3.10376 10.971 3.30143 11.0058 3.5 11C3.69857 11.0058 3.89624 10.971 4.08087 10.8977C4.2655 10.8244 4.4332 10.7141 4.57367 10.5737C4.71414 10.4332 4.82441 10.2655 4.89773 10.0809C4.97104 9.89624 5.00584 9.69857 5 9.5V2.5C5 1.63525 4.4775 0 2.5 0C0.5225 0 0 1.63525 0 2.5V11.475C0 11.5 0.04 13.975 3.5 13.975C6.96 13.975 7 11.5 7 11.475V5.5C7 5.36739 6.94732 5.24021 6.85355 5.14645C6.75979 5.05268 6.63261 5 6.5 5C6.36739 5 6.24021 5.05268 6.14645 5.14645C6.05268 5.24021 6 5.36739 6 5.5Z"
+                      fill="#6D6D6D"
+                    />
+                  </Svg>
+                </TouchableOpacity>
+
+
+
+                <FileUploader
+                  sessionId={sessionId}
+                  sessionSecret={sessionSecret}
+                  widgetId={widgetId}
+                  style={chatStyles.dropdownItem1}
+                  isDropdownOpen1={isDropdownOpen1}
+                  handleCloseDropdown1={handleCloseDropdown1}
+                  maxFileAllowed={10000000}
+                  handleOverlayPress1={handleOverlayPress1}
+                  uploadAttachment={handleUploadAttachment}
+                  removeAttachment={handleRemoveAttachment}
+                  // isChat={isChat}
+                  uploadTo={'errand/uploadAnswerAttachment'}
+                  // attachmentURL={attachmentURL}
+                  // isAttachAvailable={isAttachAvailable}
+                  selectedFile={selectedFile}
+                  setSelectedFile={setSelectedFile}
+                  // setPreviewModalVisible={setPreviewModalVisible}
+                  renderFooter={renderFooter}
+                  chatEnded={chatEnded}
+                  message={messagesP}
+                />
+
+              </View>
+              <View style={chatStyles.menuBarRight}>
+                <TouchableOpacity onPress={onSend} hitSlop={hitSlop}>
+                  <Svg
+                    width="20"
+                    height="18"
+                    viewBox="0 0 20 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <Path
+                      id="Path 451"
+                      d="M18.6206 7.63467L2.12065 0.134668C1.84804 0.010771 1.54459 -0.0287009 1.24936 0.0213336C0.95413 0.0713681 0.680631 0.208619 0.464071 0.415418C0.24751 0.622218 0.0978001 0.8891 0.0342121 1.18171C-0.0293759 1.47432 -0.00393137 1.77927 0.10727 2.05729L2.88452 9.00004L0.10727 15.9428C-0.00393137 16.2208 -0.0293759 16.5258 0.0342121 16.8184C0.0978001 17.111 0.24751 17.3779 0.464071 17.5847C0.680631 17.7915 0.95413 17.9287 1.24936 17.9788C1.54459 18.0288 1.84804 17.9893 2.12065 17.8654L18.6206 10.3654C18.8827 10.2462 19.105 10.0541 19.2608 9.81194C19.4167 9.56983 19.4996 9.28798 19.4996 9.00004C19.4996 8.71211 19.4167 8.43025 19.2608 8.18814C19.105 7.94603 18.8827 7.75389 18.6206 7.63467ZM1.50002 16.5L4.20002 9.75004H8.25002C8.44893 9.75004 8.6397 9.67103 8.78035 9.53037C8.921 9.38972 9.00002 9.19896 9.00002 9.00004C9.00002 8.80113 8.921 8.61037 8.78035 8.46971C8.6397 8.32906 8.44893 8.25004 8.25002 8.25004H4.20002L1.50002 1.50004L18 9.00004L1.50002 16.5Z"
+                      fill={primaryColor}
+                    />
+                  </Svg>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  };
   const renderMessage = (message, index) => {
     let messageData;
-  try {
-    messageData = JSON.parse(message.message);
-    removeWebsocket()
-  } catch (e) {
-    messageData = null;
-  }
-  if (messageData && messageData.event === "OWNER_ENDS_CHAT") {
-    return (
-      <View
-              style={[
-                chatStyles.rightMessage,
-                { backgroundColor: clientBgColor },
-              ]}>
-        <Text style={chatStyles.specialMessageText}>Chat Ended by {messageData.who}</Text>
-      </View>
-    );
-  }
+    try {
+      messageData = JSON.parse(message.message);
+      removeWebsocket()
+    } catch (e) {
+      messageData = null;
+    }
+    if (messageData && messageData.event === "OWNER_ENDS_CHAT") {
+      console.log("..........");
+
+
+      if (!chatEnded) { setChatEnded(true); }
+
+      return (
+        <View
+          style={[
+            chatStyles.rightMessage1,
+            { backgroundColor: clientBgColor },
+          ]}
+        >
+          <Text style={[
+            chatStyles.specialMessageText,
+            { color: '#6D6D6D' },
+          ]}>Chat Ended by {messageData.who}</Text>
+        </View>
+      );
+    }
     if (message?.agent) {
       if (message.message) {
         return (
@@ -403,7 +551,7 @@ const NextModal = React.memo(({
                 { backgroundColor: clientBgColor },
               ]}>
               <View style={chatStyles.messageContent}>
-                <Text style={chatStyles.senderName}>{name? name : clientName}</Text>
+                <Text style={chatStyles.senderName}>{name ? name : clientName}</Text>
                 <ScrollView horizontal={false}>
                   <HTML
                     tagsStyles={tagStyles}
@@ -423,29 +571,32 @@ const NextModal = React.memo(({
       {loading && (
         <View style={chatStyles.container}>
           <View style={chatStyles.svgContainer}>
-          <CentionIcons name="chats" size={70} fontWeight="400" color={fillColor}/>
+            <CentionIcons name="chats" size={70} fontWeight="400" color={fillColor} />
           </View>
 
 
         </View>
       )}
       {!loading && noSession && (
-      // This part will render when noSession is true
-      <View style={chatStyles.sessionEndedContainer}>
-        <Text style={chatStyles.sessionEndedText}>
-          The chat is ended by our agent. Please create a new chat.
-        </Text>
-        <TouchableOpacity
-          style={chatStyles.newChatButton}
-          onPress={handleCreateNewChat}>
-          <Text style={chatStyles.newChatButtonText}>Create New Chat</Text>
-        </TouchableOpacity>
-      </View>
+        // This part will render when noSession is true
+        <View style={chatStyles.sessionEndedContainer}>
+
+          <CentionIcons name="chatbot" size={70} fontWeight="400" color={fillColor} />
+
+          <Text style={chatStyles.sessionEndedText}>
+            The chat is ended by our agent. Please create a new chat.
+          </Text>
+          <TouchableOpacity
+            style={[chatStyles.newChatButton, { borderColor: fillColor }]}
+            onPress={handleCreateNewChat}>
+            <Text style={[chatStyles.newChatButtonText, { color: fillColor }]}>Create New Chat</Text>
+          </TouchableOpacity>
+        </View>
       )}
       {!loading && availableAgents && !noSession && (
         <View style={[chatStyles.container, { backgroundColor: chatBgColor }]}>
           <View style={[chatStyles.actionBar, { backgroundColor: primaryColor }]}>
-            <TouchableOpacity style={chatStyles.actionIcon} hitSlop={hitSlop}>
+            <TouchableOpacity style={chatStyles.actionIcon} hitSlop={hitSlop} onPress={toggleChatModal}>
               <CentionIcons name="chevron-mini-down" size={22} fontWeight="800" color={headerColor} />
             </TouchableOpacity>
             <Text style={[chatStyles.title, { color: headerColor }]}>{titleText}</Text>
@@ -470,7 +621,7 @@ const NextModal = React.memo(({
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <CentionIcons name="chat-close" size={70} fontWeight="400" color={fillColor}/>
+            <CentionIcons name="chat-close" size={70} fontWeight="400" color={fillColor} />
             <Text style={{
               textAlign: 'center',
               paddingTop: 8,
@@ -557,6 +708,7 @@ const chatStyles = StyleSheet.create({
     width: '85%',
     height: 'auto',
     paddingRight: 16,
+
     // paddingLeft: 16,
     paddingTop: 16,
     // right: '5%',
@@ -566,6 +718,7 @@ const chatStyles = StyleSheet.create({
     alignItems: 'flex-start',
     width: '94%',
     height: 'auto',
+
     paddingRight: 16,
     paddingLeft: 16,
     paddingTop: 16,
@@ -578,10 +731,15 @@ const chatStyles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: 'white',
     borderWidth: 1,
+    borderBottomEndRadius: 10,
+    borderBottomStartRadius: 10,
+    borderTopEndRadius: 10,
+    borderTopStartRadius: 0,
     borderColor: '#EAEAEA',
     paddingRight: 16,
     paddingLeft: 16,
     paddingTop: 8,
+    top: '10%',
     paddingBottom: 8,
     marginLeft: 16,
     marginRight: 16,
@@ -594,12 +752,31 @@ const chatStyles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#F8F8F8',
     borderWidth: 1,
+    borderBottomEndRadius: 10,
+    borderBottomStartRadius: 10,
+    borderTopEndRadius: 0,
+    borderTopStartRadius: 10,
     borderColor: '#EAEAEA',
     paddingRight: 16,
     paddingLeft: 16,
     paddingTop: 8,
     paddingBottom: 8,
     marginLeft: 45,
+    marginRight: 16,
+  },
+  rightMessage1: {
+    width: 'auto',
+    height: 'auto',
+    alignItems: 'center',
+    marginBottom: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    paddingRight: 16,
+    paddingLeft: 16,
+    // paddingTop: 8,
+    // paddingBottom: 8,
+    marginLeft: 20,
     marginRight: 16,
   },
 
@@ -643,7 +820,14 @@ const chatStyles = StyleSheet.create({
     lineHeight: 20,
     flexWrap: 'wrap',
   },
-
+  specialMessageText: {
+    color: '#6D6D6D',
+    fontSize: 11,
+    fontFamily: 'Roboto',
+    fontWeight: '400',
+    lineHeight: 20,
+    flexWrap: 'wrap',
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -690,13 +874,34 @@ const chatStyles = StyleSheet.create({
     paddingBottom: 4,
     zIndex: 999,
   },
+  inputP: {
+    width: '70%',
+    height: 32,
+    borderBottomWidth: 0.7,
+    borderRightWidth: 0.7,
+    borderTopWidth: 0.15,
+    borderLeftWidth: 0.15,
+    borderColor: '#0C87F7',
+    borderRadius: 6,
+    fontSize: 12,
+    fontFamily: 'Roboto',
+    fontWeight: '400',
+    lineHeight: 16,
+    position: 'absolute',
+    backgroundColor: 'white',
+    paddingRight: 8,
+    paddingLeft: 8,
+    paddingTop: 4,
+    paddingBottom: 4,
+    zIndex: 999,
+  },
   menuBarContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
   },
   menuBarLeft: {
-    bottom: 5,
+    bottom: 1,
   },
   menuBarRight: {
     flex: 1,
@@ -739,6 +944,15 @@ const chatStyles = StyleSheet.create({
     flexWrap: 'wrap',
   },
 
+  dropdownTextgdg: {
+    marginTop: 5,
+    color: '#6D6D6D',
+    fontSize: 12,
+    fontFamily: 'Roboto',
+    fontWeight: '400',
+    lineHeight: 20,
+    flexWrap: 'wrap',
+  },
   value: {
     fontSize: 12,
   },
@@ -749,18 +963,33 @@ const chatStyles = StyleSheet.create({
     padding: 20,
   },
   sessionEndedText: {
-    fontSize: 16,
+    marginTop: 5,
+    color: '#6D6D6D',
+    fontSize: 12,
+    fontFamily: 'Roboto',
+    fontWeight: '400',
+    lineHeight: 20,
+    flexWrap: 'wrap',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 40,
+    paddingHorizontal: 30,
   },
   newChatButton: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
+
+
+    padding: 10,
+    // borderBottomWidth: 1,
+    // borderRightWidth: 1,
+    borderBottomWidth: 0.7,
+    borderRightWidth: 0.7,
+    borderTopWidth: 0.15,
+    borderLeftWidth: 0.15,
+    borderRadius: 12,
+    width: '60%',
+    alignItems: 'center',
   },
   newChatButtonText: {
-    color: '#ffffff',
+
   },
 });
 export default NextModal;

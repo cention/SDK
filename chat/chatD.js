@@ -604,8 +604,8 @@ export const chatStylesD = StyleSheet.create({
   dropdownItem1: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 12,
-    paddingLeft: 12,
+    paddingRight: 16,
+    paddingLeft: 16,
     paddingTop: 16,
     paddingBottom: 16,
   },
@@ -719,7 +719,7 @@ export const chatStylesD = StyleSheet.create({
     alignItems: 'center',
   },
   dropdownText1: {
-    marginLeft: 10,
+    marginLeft: 8,
     color: '#a1a1a1',
     fontSize: 12,
     fontFamily: 'Roboto',
@@ -1170,7 +1170,7 @@ export const attachStylesD = StyleSheet.create({
 
 
   dropdownText1: {
-    marginLeft: 10,
+    marginLeft: 5,
     color: '#a1a1a1',
     fontSize: 12,
     fontFamily: 'Roboto',

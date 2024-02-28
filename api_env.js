@@ -48,6 +48,7 @@ export const getActiveAgents = async (workSpace, widgetId) =>{
 
 }
 export const postUploadAnswerAttachment = async( body, workSpace) => {
+  try {
   // console.log(`${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`)
   const response = await fetch(
     `${env.URL}/s/${workSpace}/Cention/web/chat/client/uploadAttachment`,
@@ -61,16 +62,25 @@ export const postUploadAnswerAttachment = async( body, workSpace) => {
       body: body,
     },
   );
-  return handleResponse(response);
+  const jsonData = await response.json();
+  console.log('=====', body)
+  return jsonData; 
+} catch (error) {
+  console.error('Error fetching data:', error);
+  throw error; 
+}
+
+  // return handleResponse(response);
 };
 
-const handleResponse = async response => {
-  if (response.ok) {
-    const data = await response.json();
-    return data;
-  } else {
-    throw new Error(
-      'Error: ' + response.status + ' - ' + response.statusText,
-    );
-  }
-};
+// const handleResponse = async response => {
+//   if (response.ok) {
+//     const data = await response.text();
+//     console.log('ata',data)
+//     return data;
+//   } else {
+//     throw new Error(
+//       'Error: ' + response.status + ' - ' + response.statusText,
+//     );
+//   }
+// };

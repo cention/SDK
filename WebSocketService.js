@@ -76,7 +76,15 @@ export const useWebSocket = (workSpace, widgetId) => {
 
         };
         webSocket.onmessage = async event => {
+          console.log('Received:', event);
           const messageData = JSON.parse(event.data);
+          if(messageData?.args[0]?.sessionId){
+            console.log('messageData?.args[0]?.sessionId')
+            setSessionId(messageData?.args[0]?.sessionId);
+            setSessionSecret(messageData?.args[0]?.sessionSecret);
+
+          }
+
           if (messageData?.args[0]?.error === 'no session') {
             setNoSession(true);
             removeWebsocket();
@@ -113,6 +121,8 @@ export const useWebSocket = (workSpace, widgetId) => {
             }
           } else if (messageData.event === 'agent unavailable') {
             setAgentAvailable(false);
+          } else if(messageData.event === 'OWNER_ENDS_CHAT'){
+            setChatEnded(true)
           }
         };
         resolve();
