@@ -359,13 +359,12 @@ export const useWebSocket = () => {
     }});
   };
 
-  const sendDeleteErrand = (sessionId) => {
+  const sendCloseChat = () => {
     const chatMessage = {
-      type: "finish chat session",
-      data: {
-          sessionId: sessionId
-      },
-      id: 1
+      
+        type: "close chat",
+        id: 3
+      
   }
     const messageString = JSON.stringify(chatMessage);
     webSocket.send(messageString);
@@ -559,5 +558,5 @@ export const useWebSocket = () => {
   //   };
   // }, []);
 
-  return { chats, sessionId, sessionSecret,newChats,agentAvailable,newMessage,removeWebsocket,sendRegistrationData, setChats,sendMessageToWebSocket , sendDeleteErrand,sendAttachmentToWebSocket };
+  return { chats, sessionId, sessionSecret,newChats,agentAvailable,newMessage,removeWebsocket,sendRegistrationData, setChats,sendMessageToWebSocket , sendCloseChat,sendAttachmentToWebSocket };
 };

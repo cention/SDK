@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import Svg, { Path, G, Defs, Rect, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, G } from 'react-native-svg';
 import NextModal from './NextModal';
 import CentionIcons from './cention-icons';
-import { env, getCustomSdk, getActiveAgents } from './api_env';
+import { getCustomSdk, getActiveAgents } from './api_env';
 import { useWebSocket } from './WebSocketService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -44,8 +44,6 @@ const ChatModal = ({ workSpace, widgetId }) => {
       } = useWebSocket(workSpace, widgetId);
       const resume = async () =>{
         let token = await AsyncStorage.getItem('token');
-        console.log('================token', token)
-
         if (token) {
         setResumeChat(true)            
         }
@@ -62,17 +60,8 @@ const ChatModal = ({ workSpace, widgetId }) => {
             setShowChatPage(false);
         }
       },[createNewChat])
-    //   useEffect(()=>{
-    //     resume()
-    //     if (resumeChat){
-    //         setShowChatPage(true);
-    //     } else {
-    //         setShowChatPage(false);
-    //     }
-    //   },[resumeChat])
       useEffect(()=>{
         resume()
-
       },[showOtherContent])
     const fetchChatSdk = async () => {
         const fetchAgents = await getActiveAgents(workSpace, widgetId);
@@ -129,12 +118,6 @@ const ChatModal = ({ workSpace, widgetId }) => {
         setEULA(askEULA);
 
         //----------------------------------------------------------------
-        // console.log('id is here --------->', itColor)
-        // console.log('id is here --------->', text)
-        // console.log('id is here --------->', ui)
-        // console.log('id is here --------->', textEULA)
-
-
 
     };
 

@@ -1,27 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { attachStyles } from '../chat/chatS';
-import { attachStylesD } from '../chat/chatD';
 import DocumentPicker from 'react-native-document-picker';
 import CentionIcons from '../cention-icons';
 import PreviewModal from '../chat/PreviewModal';
 const FileUploader = props => {
-  const isDarkMode = props.isDark;
-  // console.log("chatEnded" , props.chatEnded)
-  const attachStyle = isDarkMode ? attachStylesD : attachStyles;
+  const attachStyle = attachStyles;
   const [selectedFile, setSelectedFile] = useState('');
   const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
-  const [isAttachmentPreviewModalVisible, setIsAttachmentPreviewModalVisible] =
-    useState(false);
+  const [isAttachmentPreviewModalVisible, setIsAttachmentPreviewModalVisible] = useState(false);
   const [isSent, setIsSent] = useState(false);
+
+    // Function to handle file selection using DocumentPicker
   const handleUpload = async () => {
     try {
       props.handleOverlayPress1()
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
       });
-
       if (result.length === 0) {
         return;
       }
@@ -29,13 +26,13 @@ const FileUploader = props => {
       setIsPreviewModalVisible(true);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
-        // console.log('User canceled file selection.');
       } else {
         console.error('Error picking a file:', err);
       }
     }
   };
 
+    // Function to trigger the attachment preview modal
   const handlePrevAttach = async () => {
     try {
       props.handleOverlayPress1()
@@ -43,14 +40,15 @@ const FileUploader = props => {
     } catch (err) { }
   };
 
+    // Function to close modals and reset state
   const closeModal = () => {
     setIsAttachmentPreviewModalVisible(false);
     setIsPreviewModalVisible(false);
     setIsSent(false);
   };
 
+    // Function to send the selected file
   const sendFile = async () => {
-    console.log('========================================')
     const randomNum = Math.floor(Math.random() * 1000);
     try {
       const formData = new FormData();
@@ -59,7 +57,6 @@ const FileUploader = props => {
         type: selectedFile.type,
         name: selectedFile.name,
       });
-      // formData.append('fileNameOnly', selectedFile.name);
       formData.append('session', props.sessionId);
       formData.append('area', props.widgetId);
       formData.append('sessionSecret', props.sessionSecret);
@@ -85,6 +82,7 @@ const FileUploader = props => {
 
   return (
     <View>
+            {/* Modal for displaying the file upload options */}
       <Modal
         transparent={true}
         animationType="none"
@@ -117,16 +115,19 @@ const FileUploader = props => {
             </TouchableOpacity>
 
           )}
+          {/* Option to end or start a new chat */}
 
           <TouchableOpacity
             style={attachStyle.dropdownItem1}
-            onPress={() => handleOptionSelect()}>
+            onPress={() => props.handleEndChat()}>
             {!props.chatEnded && (
               <View style={attachStyle.dropdownItemContent1}>
                 <CentionIcons name="chat-close" size={19} fontWeight="800" color="#989898" />
                 <Text style={attachStyle.dropdownText1}>End chat</Text>
               </View>
             )}
+
+            {/* Option to attach files */}
             {props.chatEnded && (
               <View style={attachStyle.dropdownItemContent1}>
                 <CentionIcons name="chat-new" size={19} fontWeight="800" color="#989898" />
@@ -148,6 +149,7 @@ const FileUploader = props => {
         </View>
 
       </Modal>
+      {/* Conditional rendering of preview modal for attachments */}
 
       {
         isAttachmentPreviewModalVisible && (
@@ -168,6 +170,7 @@ const FileUploader = props => {
         )
 
       }
+      {/* Conditional rendering of file preview modal */}
 
       {isPreviewModalVisible && (
         <PreviewModal

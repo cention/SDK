@@ -5,20 +5,20 @@ import Swiper from 'react-native-swiper';
 import CentionIcons from '../cention-icons';
 const PreviewModal = ({
   visible,
-  isSent,
   imageUri,
   onClose,
   onSend,
   isAttachmentPreviewModalVisible,
   renderFooter,
-  handleSendMessage,
-  message
 }) => {
   const [galleryIndex, setGalleryIndex] = useState(0);
 
+    // Function to change the gallery index to a specific image
   const openGallery = (index) => {
     setGalleryIndex(index);
   };
+
+    // Function to open an image link in the browser
   const openImageLink = (url) => {
     Linking.openURL(url);
   };

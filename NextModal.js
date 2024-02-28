@@ -6,23 +6,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   TextInput,
-  Image,
-  Modal,
-  FlatList,
   useWindowDimensions,
   KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Circle, G, Path, Defs, ClipPath, Rect } from 'react-native-svg';
 import FileUploader from './fileUploader/FileUploader';
 import CentionIcons from './cention-icons';
-import { attachStyles } from './chat/chatS';
-import { attachStylesD } from './chat/chatD';
 import { useWebSocket } from './WebSocketService';
 import HTML from 'react-native-render-html';
 import { env, postUploadAnswerAttachment } from './api_env';
 
+// Define the ChatPage component using React.memo for performance optimization
 const NextModal = React.memo(({
   question,
   email,
@@ -42,41 +37,47 @@ const NextModal = React.memo(({
   newChat,
   toggleChatModal,
 }) => {
+
+  // State hooks for managing chat messages, UI states, and user inputs
   const [chatMessages, setChatMessages] = useState([]);
-  const scrollViewRef = useRef();
-  const [messages2, setMessage2] = useState('');
-  const [messagesP, setMessageP] = useState('');
-  const hitSlop = { top: 10, bottom: 10, left: 20, right: 20 };
-  // const [isAttachAvailable, setIsAttachAvailable] = useState(false);
-  const [isDropdownOpen1, setIsDropdownOpen1] = useState(false);
-  // const [isChat, setIsChat] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  // const [attachmentURL, setAttouchmentURL] = useState([]);
-  // const [isPreviewModalVisible, setPreviewModalVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [animationProgress, setAnimationProgress] = useState(1);
-  const [animationCompleted, setAnimationCompleted] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [clientName, setClientName] = useState('')
-  const [chatEnded, setChatEnded] = useState(false);
-  const opacity = animationCompleted ? 1 : animationProgress / 70;
-  const isDarkMode = false;
-  const attachStyle = isDarkMode ? attachStylesD : attachStyles;
-  const fillColor = `rgba(${parseInt(primaryColor.substring(1, 3), 16)}, ${parseInt(primaryColor.substring(3, 5), 16)}, ${parseInt(primaryColor.substring(5, 7), 16)}, ${opacity})`;
+  const scrollViewRef = useRef(); // Reference to the ScrollView for automatic scrolling
+  const [messages2, setMessage2] = useState(''); // State for input text
+  const [messagesP, setMessageP] = useState(''); // State for preview messages
+  const hitSlop = { top: 10, bottom: 10, left: 20, right: 20 }; // Area for touchable opacity
+  const [isDropdownOpen1, setIsDropdownOpen1] = useState(false); // Dropdown state
+  const [selectedFile, setSelectedFile] = useState(null); // State for file selection
+  const [loading, setLoading] = useState(true); // Loading state for initial load animation
+  const [animationProgress, setAnimationProgress] = useState(1); // Animation progress state
+  const [animationCompleted, setAnimationCompleted] = useState(false); // Animation completion flag
+  const [initialLoad, setInitialLoad] = useState(true); // Flag to check if it's the initial load
+  const [clientName, setClientName] = useState(''); // State to store client's name
+  const [chatEnded, setChatEnded] = useState(false); // State to indicate if the chat has ended
+  const opacity = animationCompleted ? 1 : animationProgress / 70; // Calculate opacity for loading animation
+  const fillColor = `rgba(${parseInt(primaryColor.substring(1, 3), 16)}, ${parseInt(primaryColor.substring(3, 5), 16)}, ${parseInt(primaryColor.substring(5, 7), 16)}, ${opacity})`; // Calculate fill color based on primaryColor and opacity
   const tagStyles = useMemo(() => ({
     body: {
       color: 'grey',
       fontSize: 12,
     },
-  }), []);
+  }), []); // Memoize tag styles for performance optimization
 
+    // Function to handle the creation of a new chat
   const handleCreateNewChat = async () => {
     newChat()
   }
 
+    // Function to handle the end of a chat
+  const handleEndChat = async () =>{
+    sendCloseChat()
+  setTimeout(() => {
+    newChat();
+  }, 800);
+  }
+
+    // Destructure functions from useWebSocket hook
   const {
     sendMessageToWebSocket,
-    sendDeleteErrand,
+    sendCloseChat,
     sendRegistrationData,
     newMessage,
     noSession,
@@ -86,57 +87,57 @@ const NextModal = React.memo(({
     sessionSecret,
     removeWebsocket
   } = useWebSocket(workSpace, widgetId);
-  // useEffect(() => {
-  //   renderMessage(',')
 
-  // }, [noSession])
+    // Effect hook to send registration data on component mount
   useEffect(() => {
     sendRegistrationData({ name, email, question });
   }, []);
+
+    // Function to toggle the dropdown
   const handleDropdownToggle1 = () => {
     setIsDropdownOpen1(!isDropdownOpen1);
   };
+
+    // Function to close the dropdown
   const handleCloseDropdown1 = () => {
     setIsDropdownOpen1(false);
   };
+
+    // Function to handle overlay press
   const handleOverlayPress1 = () => {
     setIsDropdownOpen1(false);
   };
 
-
-
-
-
-
+    // Function to handle file upload attachment
   const handleUploadAttachment = async dataFiles => {
     if (dataFiles) {
       const result = await postUploadAnswerAttachment(dataFiles, workSpace);
-      // setFId(result.id);
-      // let mcount = chatMessages.length;
-      console.log(';;;;;;;;;;;;', result)
-
       sendAttachmentToWebSocket(result);
     }
     setIsDropdownOpen1(false);
   };
+
+    // Effect hook to process new messages upon receiving
   useEffect(() => {
     if (newMessage && newMessage.length > 0 && initialLoad) {
-      console.log("first")
       const allMessages = newMessage[0].message;
       setClientName(newMessage[0].clientName)
       allMessages.map(parseNewMessages);
       setInitialLoad(false);
     }
   }, [newMessage]);
+
+    // Similar effect hook for processing messages but after initial load
   useEffect(() => {
     if (newMessage && newMessage.length > 0 && !initialLoad) {
-      console.log("second")
       const latestMessage = newMessage[0].message[newMessage[0].message.length - 1];
       const parsedMessage = parseNewMessages(latestMessage);
       setClientName(newMessage[0].clientName)
       setChatMessages((prevMessages) => [...prevMessages, parsedMessage]);
     }
   }, [newMessage]);
+
+    // Function to parse new messages and update UI
   const parseNewMessages = newMessage => {
     const result = {
       agent: newMessage.agent,
@@ -144,13 +145,13 @@ const NextModal = React.memo(({
       channel: 'chat',
       dead: '',
       message: updateImageUrls(newMessage.text),
-      // sender: 'newMessage.fromClient ? sender : newMessage.agent',
       timestamp: newMessage.sentHuman,
     };
-    console.log('Neeee', result)
 
     setChatMessages(prevMessages => [...prevMessages, result]);
   };
+
+    // Function to update image URLs within message content
   function updateImageUrls(message) {
     if (message) {
       const baseUrl = `${env.URL}/s/${workSpace}/s/${workSpace}`;
@@ -173,9 +174,16 @@ const NextModal = React.memo(({
       return updatedMessage;
     }
   }
+
+    // Use Window dimensions to adjust content width dynamically
   const { width } = useWindowDimensions();
+
+    //  function to handle attachment removal 
   const handleRemoveAttachment = async () => {
+    //TODO
   };
+
+    // Effect hook to manage loading and animation state
   useEffect(() => {
     let interval;
 
@@ -203,10 +211,9 @@ const NextModal = React.memo(({
     };
   }, [loading, animationCompleted]);
 
+    // Function to handle sending messages
   const handleSendMessage = async () => {
     try {
-      let mcount = chatMessages.length;
-
       if (messages2.trim() === '') return;
       sendMessageToWebSocket(messages2);
       setMessage2('');
@@ -216,6 +223,8 @@ const NextModal = React.memo(({
       console.error('Error fetching data:', error);
     }
   };
+
+    // Similar effect hook to handleSendMessage but for message previews
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -223,10 +232,10 @@ const NextModal = React.memo(({
 
     return () => clearTimeout(timer);
   }, []);
+
+
   const handleSendMessagePreview = async () => {
     try {
-      let mcount = chatMessages.length;
-
       if (messagesP.trim() === '') return;
       sendMessageToWebSocket(messagesP);
       setMessageP('');
@@ -244,53 +253,15 @@ const NextModal = React.memo(({
     return () => clearTimeout(timer);
   }, []);
 
-
+  // Function to render the chat input footer
   const renderFooter = () => {
-    // const renderMessage = (message, index) => {
-    //   if (message.sender === 'agent') {
-    //     return (
-    //       <View key={index} style={chatStyles.messageContainerLeft}>
-    //         {/* Agent Message */}
-    //         <View style={[chatStyles.message, { backgroundColor: agentBgColor }]}>
-    //           <View style={chatStyles.messageContent}>
-    //             <Text style={chatStyles.senderName}>{message.agent}</Text>
-    //             <ScrollView horizontal={false}>
-    //               <Text
-    //                 style={[chatStyles.messageText, { color: chatTextColor }]}>
-    //                 {message.message}
-    //               </Text>
-    //             </ScrollView>
-    //           </View>
-    //         </View>
-    //       </View>
-    //     );
-    //   } else {
-    //     // Client Message
-    //     return (
-    //       <View key={index} style={chatStyles.messageContainerRight}>
-    //         <View
-    //           style={[
-    //             chatStyles.rightMessage,
-    //             { backgroundColor: clientBgColor },
-    //           ]}>
-    //           <View style={chatStyles.messageContent}>
-    //             <Text style={chatStyles.senderName}>{name? name : clientName}</Text>
-    //             <ScrollView horizontal={true}>
-    //               <Text
-    //                 style={[chatStyles.messageText, { color: chatTextColor }]}>
-    //                 {message.message}
-    //               </Text>
-    //             </ScrollView>
-    //           </View>
-    //         </View>
-    //       </View>
-    //     );
-    //   }
-    // };
+        // KeyboardAvoidingView to ensure the input field is visible when the keyboard is displayed
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                  {/* Chat input container */}
         <View style={chatStyles.inputContainer}>
+          {/* Input wrapper to style and position the text input and send button */}
           <View style={chatStyles.inputWrapper}>
             <TextInput
               style={[
@@ -305,6 +276,7 @@ const NextModal = React.memo(({
               value={messages2}
               onChangeText={text => setMessage2(text)}
             />
+                        {/* Menu bar container for additional actions like opening the file uploader */}
             <View style={chatStyles.menuBarContainer}>
               <View style={chatStyles.menuBarLeft}>
                 <TouchableOpacity
@@ -323,9 +295,6 @@ const NextModal = React.memo(({
                     />
                   </Svg>
                 </TouchableOpacity>
-
-
-
                 <FileUploader
                   sessionId={sessionId}
                   sessionSecret={sessionSecret}
@@ -337,13 +306,10 @@ const NextModal = React.memo(({
                   handleOverlayPress1={handleOverlayPress1}
                   uploadAttachment={handleUploadAttachment}
                   removeAttachment={handleRemoveAttachment}
-                  // isChat={isChat}
+                  handleEndChat={handleEndChat}
                   uploadTo={'errand/uploadAnswerAttachment'}
-                  // attachmentURL={attachmentURL}
-                  // isAttachAvailable={isAttachAvailable}
                   selectedFile={selectedFile}
                   setSelectedFile={setSelectedFile}
-                  // setPreviewModalVisible={setPreviewModalVisible}
                   renderFooter={renderFooterPreview}
                   chatEnded={chatEnded}
                   handleSendMessage={handleSendMessagePreview}
@@ -372,6 +338,7 @@ const NextModal = React.memo(({
       </KeyboardAvoidingView>
     );
   };
+    // Similar to renderFooter but specific to preview 
   const renderFooterPreview = (onSend) => {
 
     return (
@@ -379,34 +346,12 @@ const NextModal = React.memo(({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={chatStyles.inputContainer}>
           <View style={chatStyles.inputWrapper}>
-            {/* <Text
-              style={[
-                chatStyles.input,
-                {
-                  color: inputTextColor,
-                  backgroundColor: inputBgColor,
-                  borderColor: primaryColor,
-                },
-              ]}
-              
-            > Attach your Image or document</Text> */}
+          
             <View style={chatStyles.menuBarContainer}>
               <View style={chatStyles.menuBarLeft}>
                 <TouchableOpacity
 
                   hitSlop={hitSlop}>
-                  {/* <Svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <Path
-                      id="Path 583"
-                      d="M18.75 9.5H10.5V1.25C10.5 1.05109 10.421 0.860322 10.2803 0.71967C10.1397 0.579018 9.94891 0.5 9.75 0.5C9.55109 0.5 9.36032 0.579018 9.21967 0.71967C9.07902 0.860322 9 1.05109 9 1.25V9.5H0.75C0.551088 9.5 0.360322 9.57902 0.21967 9.71967C0.0790176 9.86032 0 10.0511 0 10.25C0 10.4489 0.0790176 10.6397 0.21967 10.7803C0.360322 10.921 0.551088 11 0.75 11H9V19.25C9 19.4489 9.07902 19.6397 9.21967 19.7803C9.36032 19.921 9.55109 20 9.75 20C9.94891 20 10.1397 19.921 10.2803 19.7803C10.421 19.6397 10.5 19.4489 10.5 19.25V11H18.75C18.9489 11 19.1397 10.921 19.2803 10.7803C19.421 10.6397 19.5 10.4489 19.5 10.25C19.5 10.0511 19.421 9.86032 19.2803 9.71967C19.1397 9.57902 18.9489 9.5 18.75 9.5Z"
-                      fill={primaryColor}
-                    />
-                  </Svg> */}
                   <Svg
                    
                     width="25"
@@ -420,9 +365,6 @@ const NextModal = React.memo(({
                     />
                   </Svg>
                 </TouchableOpacity>
-
-
-
                 <FileUploader
                   sessionId={sessionId}
                   sessionSecret={sessionSecret}
@@ -434,13 +376,9 @@ const NextModal = React.memo(({
                   handleOverlayPress1={handleOverlayPress1}
                   uploadAttachment={handleUploadAttachment}
                   removeAttachment={handleRemoveAttachment}
-                  // isChat={isChat}
                   uploadTo={'errand/uploadAnswerAttachment'}
-                  // attachmentURL={attachmentURL}
-                  // isAttachAvailable={isAttachAvailable}
                   selectedFile={selectedFile}
                   setSelectedFile={setSelectedFile}
-                  // setPreviewModalVisible={setPreviewModalVisible}
                   renderFooter={renderFooter}
                   chatEnded={chatEnded}
                   message={messagesP}
@@ -469,6 +407,8 @@ const NextModal = React.memo(({
       </KeyboardAvoidingView>
     );
   };
+
+    // Function to render individual chat messages
   const renderMessage = (message, index) => {
     let messageData;
     try {
@@ -477,10 +417,7 @@ const NextModal = React.memo(({
     } catch (e) {
       messageData = null;
     }
-    if (messageData && messageData.event === "OWNER_ENDS_CHAT") {
-      console.log("..........");
-
-
+    if (messageData && (messageData.event === "OWNER_ENDS_CHAT" || messageData.event === "CLIENT_ENDS_CHAT" )) {
       if (!chatEnded) { setChatEnded(true); }
 
       return (
@@ -493,7 +430,7 @@ const NextModal = React.memo(({
           <Text style={[
             chatStyles.specialMessageText,
             { color: '#6D6D6D' },
-          ]}>Chat Ended by {messageData.who}</Text>
+          ]}>Chat Ended by {messageData.who?messageData.who:messageData.name }</Text>
         </View>
       );
     }
@@ -566,6 +503,7 @@ const NextModal = React.memo(({
       }
     }
   };
+    // Main component render logic
   return (
     <>
       {loading && (
@@ -638,6 +576,8 @@ const NextModal = React.memo(({
     </>
   );
 });
+
+// Styles for the component
 const chatStyles = StyleSheet.create({
   container: {
     flex: 1,
@@ -774,8 +714,6 @@ const chatStyles = StyleSheet.create({
     borderColor: '#EAEAEA',
     paddingRight: 16,
     paddingLeft: 16,
-    // paddingTop: 8,
-    // paddingBottom: 8,
     marginLeft: 20,
     marginRight: 16,
   },
@@ -975,11 +913,7 @@ const chatStyles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   newChatButton: {
-
-
     padding: 10,
-    // borderBottomWidth: 1,
-    // borderRightWidth: 1,
     borderBottomWidth: 0.7,
     borderRightWidth: 0.7,
     borderTopWidth: 0.15,
@@ -992,4 +926,5 @@ const chatStyles = StyleSheet.create({
 
   },
 });
+
 export default NextModal;
