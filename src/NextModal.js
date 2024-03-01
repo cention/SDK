@@ -33,7 +33,7 @@ const NextModal = React.memo(({
   inputBgColor,
   inputTextColor,
   titleText,
-  availableAgents,
+  // availableAgents,
   newChat,
   toggleChatModal,
 }) => {
@@ -52,6 +52,7 @@ const NextModal = React.memo(({
   const [initialLoad, setInitialLoad] = useState(true); // Flag to check if it's the initial load
   const [clientName, setClientName] = useState(''); // State to store client's name
   const [chatEnded, setChatEnded] = useState(false); // State to indicate if the chat has ended
+  const [availableAgents, setAvailableAgents] = useState(false);
   const opacity = animationCompleted ? 1 : animationProgress / 70; // Calculate opacity for loading animation
   const fillColor = `rgba(${parseInt(primaryColor.substring(1, 3), 16)}, ${parseInt(primaryColor.substring(3, 5), 16)}, ${parseInt(primaryColor.substring(5, 7), 16)}, ${opacity})`; // Calculate fill color based on primaryColor and opacity
   const tagStyles = useMemo(() => ({
@@ -88,6 +89,12 @@ const NextModal = React.memo(({
     removeWebsocket
   } = useWebSocket(workSpace, widgetId);
 
+
+  useEffect(()=>{
+    // console.log(agentAvailable)
+    // setAvailableAgents(true)
+    setAvailableAgents(agentAvailable)
+  },[agentAvailable])
     // Effect hook to send registration data on component mount
   useEffect(() => {
     sendRegistrationData({ name, email, question });

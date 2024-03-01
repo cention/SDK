@@ -36,7 +36,7 @@ const ChatModal = ({ workSpace, widgetId }) => {
     const [eulaColor, setEULAColor] = useState(false);
     const [headerText, setHeaderText] = useState(null);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
-    const [availableAgents, setAvailableAgents] = useState(false);
+    // const [availableAgents, setAvailableAgents] = useState(false);
     const [resumeChat, setResumeChat] = useState(false);
 
     const {
@@ -53,7 +53,6 @@ const ChatModal = ({ workSpace, widgetId }) => {
       }
       const newChat = async () =>{
         setShowChatPage(false);
-
       }
       useEffect(()=>{
         if(createNewChat){
@@ -64,13 +63,13 @@ const ChatModal = ({ workSpace, widgetId }) => {
         resume()
       },[showOtherContent])
     const fetchChatSdk = async () => {
-        const fetchAgents = await getActiveAgents(workSpace, widgetId);
-        const agents = fetchAgents.agents;
-        if (agents.length === 0) {
-            setAvailableAgents(false);
-        } else {
-            setAvailableAgents(true);
-        }
+        // const fetchAgents = await getActiveAgents(workSpace, widgetId);
+        // const agents = fetchAgents.agents;
+        // if (agents.length === 0) {
+        //     setAvailableAgents(false);
+        // } else {
+        //     setAvailableAgents(true);
+        // }
         const fetchData = await getCustomSdk(workSpace, widgetId);
         const data = fetchData.chatWidgetCfg;  
         //Get colors
@@ -257,6 +256,11 @@ const ChatModal = ({ workSpace, widgetId }) => {
         fetchChatSdk();
     };
 
+    // const agentAvailable = () =>{
+    //     setAvailableAgents(true)
+
+    // }
+
     return (
         <>
             <TouchableOpacity
@@ -288,7 +292,8 @@ const ChatModal = ({ workSpace, widgetId }) => {
                                         inputBgColor = {inputBgColor}
                                         inputTextColor = {inputTextColor}
                                         titleText = {titleText}
-                                        availableAgents = {availableAgents}
+                                        // availableAgents = {availableAgents}
+                                        // setAvailableAgents={setAvailableAgents}
                                         newChat={newChat}
                                         toggleChatModal = {toggleChatModal}
                                     />
