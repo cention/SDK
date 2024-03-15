@@ -25,6 +25,7 @@ const NextModal = React.memo(
     workSpace,
     widgetId,
     name,
+    areaId,
     primaryColor,
     headerColor,
     chatBgColor,
@@ -95,7 +96,7 @@ const NextModal = React.memo(
       agentAvailable,
       sessionSecret,
       removeWebsocket,
-    } = useWebSocket(workSpace, widgetId);
+    } = useWebSocket(workSpace, areaId);
 
     // Effect hook to send registration data on component mount
     useEffect(() => {
@@ -316,7 +317,7 @@ const NextModal = React.memo(
                   <FileUploader
                     sessionId={sessionId}
                     sessionSecret={sessionSecret}
-                    widgetId={widgetId}
+                    areaId={areaId}
                     style={chatStyles.dropdownItem1}
                     isDropdownOpen1={isDropdownOpen1}
                     handleCloseDropdown1={handleCloseDropdown1}
@@ -384,7 +385,7 @@ const NextModal = React.memo(
                   <FileUploader
                     sessionId={sessionId}
                     sessionSecret={sessionSecret}
-                    widgetId={widgetId}
+                    areaId={areaId}
                     style={chatStyles.dropdownItem1}
                     isDropdownOpen1={isDropdownOpen1}
                     handleCloseDropdown1={handleCloseDropdown1}

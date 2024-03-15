@@ -109,7 +109,7 @@ export const useWebSocket = () => {
 //   }
 // }
 // const connectWebSocket = (existingSessionId = '', existingSessionSecret = '', resume = false) => {
-//   const wsUrl = 'wss://cloud-qa.cention.com/s/tobias/external.ws';
+//   const wsUrl = 'wss://cloud.cention.com/s/tobias/external.ws';
 //   const webSocket = new WebSocket(wsUrl);
 
 //   webSocket.onopen = () => {
@@ -189,7 +189,7 @@ export const useWebSocket = () => {
     return new Promise((resolve, reject) => {
       
     // console.log(name, email, question)
-       const webSocket = new WebSocket('wss://cloud-qa.cention.com/s/tobias/external.ws');
+       const webSocket = new WebSocket('wss://cloud.cention.com/s/tobias/external.ws');
 
        webSocketInstance = webSocket;
     // console.log("WebSocketteedt");
@@ -210,7 +210,7 @@ export const useWebSocket = () => {
         "deviceModel":"","deviceType":"","osName":"WindowebSocket",
         "osVersion":"10",
         "ua":"Mozilla/5.0 (WindowebSocket NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36","isMobile":false},
-        "baseURL":"https://cloud-qa.cention.com/s/tobias","offlineChat":false,
+        "baseURL":"https://cloud.cention.com/s/tobias","offlineChat":false,
         "href":"https://sandbox.cention.com/mobile-test/","trackClientUrl":true},
         "id":1
       };
@@ -511,7 +511,7 @@ export const useWebSocket = () => {
   // useEffect(() => {
   //   if (!webSocket) {
   //     // console.log('no websocket')
-  //   const webSocket = new WebSocket('webSockets://cloud-qa.cention.com/s/tobias/external.webSocket');
+  //   const webSocket = new WebSocket('webSockets://cloud.cention.com/s/tobias/external.webSocket');
   //   // webSocket.WebSocket = ReconnectingWebSocket;
   //   setWebSocket(webSocket)
   //   webSocket.onopen = () => {
@@ -530,7 +530,7 @@ export const useWebSocket = () => {
   //       "deviceModel":"","deviceType":"","osName":"WindowebSocket",
   //       "osVersion":"10",
   //       "ua":"Mozilla/5.0 (WindowebSocket NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36","isMobile":false},
-  //       "baseURL":"https://cloud-qa.cention.com/s/tobias","offlineChat":false,"href":"https://sandbox.cention.com/mobile-test/","trackClientUrl":true},"id":1
+  //       "baseURL":"https://cloud.cention.com/s/tobias","offlineChat":false,"href":"https://sandbox.cention.com/mobile-test/","trackClientUrl":true},"id":1
   //     };
 
   //     webSocket.send(JSON.stringify(registrationRequest));

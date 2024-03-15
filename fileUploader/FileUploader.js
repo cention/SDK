@@ -60,7 +60,7 @@ const FileUploader = props => {
         name: selectedFile.name,
       });
       formData.append('session', props.sessionId);
-      formData.append('area', props.widgetId);
+      formData.append('area', props.areaId);
       formData.append('sessionSecret', props.sessionSecret);
       formData.append('random', randomNum);
       props.uploadAttachment(formData);
