@@ -45,7 +45,7 @@ import Chat from '@centiongroup/chat-sdk';
 To integrate the Cention Chat SDK into your application, you'll need to configure the chat widget with specific parameters. Below is an example of how you can set up the integration:
 
 ```javascript
-<ChatModal workSpace={'worspace_name'} widgetId={widgetId_number} customization={false} />
+<ChatModal workSpace={'worspace_name'} widgetId={widgetId} customization={false} />
 ```
 - `workSpace`: Specifies the workspace or domain associated with your Cention account. In the provided example, it's set to 'workspace_name'. You'll need to replace 'workspace_name' with the respective workspace.
 - `widgetId`: Represents the unique identifier of the chat SDK or configuration within your Cention Contact Center account. Here, it's set to 'widgetId_number'. Replace 'widgetId_number' with the appropriate widget ID.
