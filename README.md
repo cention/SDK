@@ -23,10 +23,6 @@
 
 •	The Chat SDK support react native version -.--- .
 
-## Getting Started with `@centiongroup/chat-sdk`
-
-The `@centiongroup/chat-sdk` is an SDK package designed to integrate chat functionality seamlessly into your web application. Here's how you can use it in your project:
-
 ### Installation
 
 First, you need to install the package via npm. In your project directory, run:
