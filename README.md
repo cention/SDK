@@ -23,6 +23,27 @@
 
 •	The Chat SDK support react native version -.--- .
 
+## Getting Started with `@centiongroup/chat-sdk`
+
+The `@centiongroup/chat-sdk` is an SDK package designed to integrate chat functionality seamlessly into your web application. Here's how you can use it in your project:
+
+### Installation
+
+First, you need to install the package via npm. In your project directory, run:
+
+```bash
+npm install @centiongroup/chat-sdk
+```
+
+This command installs the `chat-sdk` from the `centiongroup` organization scope into your project's `node_modules` folder and adds it to the dependencies in your `package.json`.
+
+### Importing and Using the SDK
+
+Once installed, you can import the SDK into your JavaScript or TypeScript file like this:
+
+```javascript
+import Chat from '@centiongroup/chat-sdk';
+```
 
 ## Integrating Cention Chat SDK in Your App:
 To integrate the Cention Chat SDK into your application, you'll need to configure the chat widget with specific parameters. Below is an example of how you can set up the integration:
