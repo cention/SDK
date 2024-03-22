@@ -1,5 +1,5 @@
 {
-  "name": "cention_chat_sdk",
+  "name": "@centiongroup/chat-sdk",
   "version": "0.0.1",
   "description": "A comprehensive Mobile SDK for integrating Cention's real-time communication and collaboration features into mobile applications. This SDK enables developers to effortlessly incorporate chat, voice, and video functionalities, alongside advanced collaboration tools, into their iOS and Android apps, ensuring a seamless user experience. Designed for flexibility, the Cention Mobile SDK offers extensive customization options to match your app's design and workflow requirements",
   "main": "index.js",

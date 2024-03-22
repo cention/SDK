@@ -4,12 +4,12 @@ import { StyleSheet } from 'react-native';
 
 export const previewStyles = StyleSheet.create({
   modalContainer: {
-   top:'12.7%',
+   top:'12%',
     backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    borderRadius: 10,
+    borderRadius: 0,
     width: '90%',
     height: '80%',
   },

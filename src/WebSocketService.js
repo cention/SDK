@@ -5,7 +5,7 @@ import {env, socketenv} from './api_env';
 import {getSDKConfig} from './SDKConfig';
 
 
-export const useWebSocket = (workSpace, widgetId) => {
+export const useWebSocket = (workSpace, areaId) => {
   // Retrieve configuration from SDKConfig
   const {notificationService} = getSDKConfig();
   // State management for various aspects of WebSocket interaction
@@ -111,7 +111,6 @@ export const useWebSocket = (workSpace, widgetId) => {
               }
             } else if (messageData.event === 'CHAT_NEW_MESSAGE') {
               const result = await parseMessagesInfo(messageData);
-
               if (result && result.length > 0) {
                 const index = result[0]?.message?.length - 1;
                 const title = 'New Message';
@@ -159,7 +158,7 @@ export const useWebSocket = (workSpace, widgetId) => {
           const registrationRequest = {
             type: 'register',
             data: {
-              area: widgetId,
+              area: areaId,
               name: name,
               email: email,
               phone: '',
@@ -298,7 +297,7 @@ export const useWebSocket = (workSpace, widgetId) => {
     const chatMessage = {
       type: 'add attachment',
       data: {
-        area: widgetId,
+        area: areaId,
         file: result,
         sessionSecret: sessionSecret,
       },

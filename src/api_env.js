@@ -1,13 +1,13 @@
 export const env = {
-    URL: 'https://cloud-qa.cention.com',
+    URL: 'https://cloud.cention.com',
   };
 export const socketenv = {
-    URL: 'wss://cloud-qa.cention.com',
+    URL: 'wss://cloud.cention.com',
   };
 export const getCustomSdk = async (workSpace, widgetId) => {
     
     try {
-      const response = await fetch(`${env.URL}/s/${workSpace}/cention/chat/chatWidgetConfig?a=${widgetId}`, {
+      const response = await fetch(`${env.URL}/s/${workSpace}/cention/chat/chatWidgetConfigWidgetId?a=${widgetId}`, {
         method: 'GET',
         headers: {
           
