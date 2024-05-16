@@ -13,9 +13,9 @@ import {
 import Svg, {Path, G} from 'react-native-svg';
 import NextModal from './NextModal';
 import CentionIcons from './cention-icons';
-import {getCustomSdk, getActiveAgents} from './api_env';
-import {useWebSocket} from './WebSocketService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getCustomSdk, getActiveAgents } from './api_env';
+import { useWebSocket } from './WebSocketService';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 const ChatModal = ({workSpace, widgetId}) => {
   const [name, setName] = useState('');
@@ -55,7 +55,7 @@ const ChatModal = ({workSpace, widgetId}) => {
 
   const {createNewChat} = useWebSocket(workSpace, areaId);
   const resume = async () => {
-    let token = await AsyncStorage.getItem('token');
+    let token = await EncryptedStorage.getItem('token')
     if (token) {
       setResumeChat(true);
     } else {
