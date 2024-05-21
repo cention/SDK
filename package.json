@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",
+    "react-native-encrypted-storage": "^4.0.3",
     "@react-native-community/push-notification-ios": "^1.11.0",
     "react": "18.2.0",
     "react-native-document-picker": "^9.1.1",

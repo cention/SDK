@@ -1,6 +1,6 @@
 // Import necessary hooks and modules
 import {useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import EncryptedStorage from 'react-native-encrypted-storage';
 import {env, socketenv} from './api_env';
 import {getSDKConfig} from './SDKConfig';
 
@@ -55,7 +55,7 @@ export const useWebSocket = (workSpace, areaId) => {
 
   // Handles registration and sending of chat data
   const sendRegistrationData = async ({name, email, question}) => {
-    let token = await AsyncStorage.getItem('token');
+    let token = await EncryptedStorage.getItem('token');
     let muid;
     return new Promise((resolve, reject) => {
       if (token) {
@@ -222,14 +222,14 @@ export const useWebSocket = (workSpace, areaId) => {
     });
   };
 
-  // Store WebSocket token in AsyncStorage
+  // Store WebSocket token in EncryptedStorage
   const addWebsocket = async token => {
-    await AsyncStorage.setItem('token', token);
+    await EncryptedStorage.setItem('token', token);
   };
 
-  // Remove WebSocket token from AsyncStorage
+  // Remove WebSocket token from EncryptedStorage
   const removeWebsocket = async () => {
-    await AsyncStorage.removeItem('token');
+    await EncryptedStorage.removeItem('token');
   };
 
   // Enable initiating a new chat
